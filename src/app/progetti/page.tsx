@@ -74,20 +74,20 @@ export default function ProgettiPage() {
 
             <div className="space-y-2">
                 {filtered.map(p => (
-                    <Card key={p.id} className="shadow-sm">
+                    <Card key={p.id} onClick={() => openEdit(p)} className="shadow-sm cursor-pointer hover:shadow-md transition-all group">
                         <CardContent className="p-4 flex items-center gap-4">
                             <div className={cn('h-10 w-10 rounded-xl flex items-center justify-center shrink-0', p.tipologia === 'preventivo' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600')}>
                                 <FolderKanban className="h-5 w-5" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="font-medium truncate">{p.nome}</p>
+                                <p className="font-medium truncate group-hover:text-primary transition-colors">{p.nome}</p>
                                 <p className="text-sm text-muted-foreground">{p.clienti?.nome || '—'}</p>
                             </div>
                             <div className="text-right shrink-0">
                                 <Badge variant="outline" className={cn('text-xs', p.tipologia === 'preventivo' ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-green-50 text-green-600 border-green-200')}>{p.tipologia === 'preventivo' ? '🔵 Prev.' : '🟢 Econ.'}</Badge>
                                 {p.importo_preventivo && <p className="text-sm font-bold mt-0.5">€{Number(p.importo_preventivo).toLocaleString()}</p>}
                             </div>
-                            <button onClick={() => openEdit(p)} className="p-2 rounded-lg hover:bg-muted text-muted-foreground"><Pencil className="h-4 w-4" /></button>
+                            <button className="p-2 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0"><Pencil className="h-4 w-4" /></button>
                         </CardContent>
                     </Card>
                 ))}
