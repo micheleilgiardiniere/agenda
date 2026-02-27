@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { getInterventiFuturo, getTodos } from '@/lib/supabase/queries'
+import { InterventoDialog } from '@/components/intervento-dialog'
 import type { Priorita } from '@/types/database'
 
 const priorityColors: Record<Priorita, string> = {
@@ -29,6 +30,8 @@ export default function DashboardPage() {
   const [events, setEvents] = useState<any[]>([])
   const [todos, setTodos] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedInterventoId, setSelectedInterventoId] = useState<string | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   const loadData = useCallback(async () => {
     try {
@@ -97,8 +100,8 @@ export default function DashboardPage() {
         <div className="space-y-2">
           {eventsForDate(selectedDate).length === 0 ? (
             <Card className="border-dashed shadow-sm"><CardContent className="p-6 text-center text-muted-foreground"><p>Nessun intervento</p><Link href="/intervento" className="text-primary text-sm mt-1 inline-block">+ Aggiungi intervento</Link></CardContent></Card>
-          ) : eventsForDate(selectedDate).map((event, i) => (
-            <Card key={i} className="shadow-sm hover:shadow-md transition-all cursor-pointer">
+          ) : eventsForDate(selectedDate).map((event) => (
+            <Card key={event.id} className="shadow-sm hover:shadow-md transition-all cursor-pointer" onClick={() => { setSelectedInterventoId(event.id); setDialogOpen(true); }}>
               <CardContent className="p-4 flex items-center gap-3">
                 <div className={cn('h-10 w-1 rounded-full shrink-0', event.progetti?.tipologia === 'preventivo' ? 'bg-blue-500' : 'bg-primary')} />
                 <div className="flex-1 min-w-0"><p className="font-medium truncate">{event.progetti?.nome || '—'}</p><p className="text-xs text-muted-foreground">{event.progetti?.clienti?.nome || ''}</p></div>
@@ -127,6 +130,8 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      <InterventoDialog interventoId={selectedInterventoId} open={dialogOpen} onOpenChange={setDialogOpen} onSaved={loadData} onDeleted={loadData} />
     </div>
   )
 }

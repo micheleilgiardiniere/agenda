@@ -15,8 +15,20 @@ import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { getCliente, getProgettiByCliente, getInterventiByProgetto, deleteIntervento } from '@/lib/supabase/queries'
-import { InterventoDialog, type InterventoDettaglio } from '@/components/intervento-dialog'
+import { InterventoDialog } from '@/components/intervento-dialog'
 import type { Cliente, Progetto } from '@/types/database'
+
+export interface InterventoDettaglio {
+    id: string
+    data: string
+    progetto: string
+    progetto_id: string
+    cliente: string
+    note: string
+    stato_contabile: 'da_contabilizzare' | 'conto_finito' | 'fatturato' | 'pagato'
+    dipendenti: { nome: string; ore: number; costo_orario: number }[]
+    materiali: { nome: string; quantita: number; prezzo: number; unita: string }[]
+}
 
 const statoLabel: Record<string, { label: string; color: string }> = {
     da_contabilizzare: { label: 'Da contab.', color: 'bg-amber-100 text-amber-700 border-amber-200' },
@@ -46,7 +58,7 @@ export default function ClienteDettaglioPage() {
     const [viewMode, setViewMode] = useState<'progetti' | 'tabella'>('progetti')
     const [selectedProgettoId, setSelectedProgettoId] = useState<string | null>(null)
     const [contabilizzati, setContabilizzati] = useState<Set<string>>(new Set())
-    const [selectedIntervento, setSelectedIntervento] = useState<InterventoDettaglio | null>(null)
+    const [selectedInterventoId, setSelectedInterventoId] = useState<string | null>(null)
     const [dialogOpen, setDialogOpen] = useState(false)
 
     const loadData = useCallback(async () => {
@@ -72,16 +84,10 @@ export default function ClienteDettaglioPage() {
     const interventiProgetto = selectedProgettoId ? (interventiMap[selectedProgettoId] || []) : []
 
     const toggleContabilizzato = (id: string) => setContabilizzati(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next })
-    const openIntervento = (interv: InterventoDettaglio) => { setSelectedIntervento(interv); setDialogOpen(true) }
+    const openIntervento = (id: string) => { setSelectedInterventoId(id); setDialogOpen(true) }
     const isProgettoAllContab = (progettoId: string) => { const intervs = interventiMap[progettoId] || []; return intervs.length > 0 && intervs.every(i => contabilizzati.has(i.id)) }
 
-    const handleDeleteIntervento = async (id: string) => {
-        try {
-            await deleteIntervento(id)
-            await loadData()
-            toast.success('Intervento eliminato')
-        } catch { toast.error('Errore eliminazione') }
-    }
+
 
     if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
 
@@ -165,7 +171,7 @@ export default function ClienteDettaglioPage() {
                                 <CardContent className="p-3">
                                     <div className="flex items-start gap-3">
                                         <Checkbox checked={checked} onCheckedChange={() => toggleContabilizzato(interv.id)} className="mt-1 h-5 w-5" />
-                                        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openIntervento(interv)}>
+                                        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openIntervento(interv.id)}>
                                             <div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">{new Date(interv.data).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })}</span><Badge variant="outline" className={cn('text-[10px]', stato?.color)}>{stato?.label}</Badge></div>
                                             <p className="font-medium text-sm mt-0.5">{interv.progetto}</p>
                                             {interv.note && <p className="text-xs text-muted-foreground truncate">{interv.note}</p>}
@@ -206,7 +212,7 @@ export default function ClienteDettaglioPage() {
                                     <CardContent className="p-4">
                                         <div className="flex items-start gap-3">
                                             <Checkbox checked={checked} onCheckedChange={() => toggleContabilizzato(interv.id)} className="mt-1 h-5 w-5" />
-                                            <div className="flex-1 cursor-pointer" onClick={() => openIntervento(interv)}>
+                                            <div className="flex-1 cursor-pointer" onClick={() => openIntervento(interv.id)}>
                                                 <div className="flex items-center justify-between mb-1"><span className="text-sm font-medium flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-muted-foreground" />{new Date(interv.data).toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' })}</span><Badge variant="outline" className={cn('text-[10px]', stato?.color)}>{stato?.label}</Badge></div>
                                                 {interv.note && <p className="text-sm text-muted-foreground mb-2">{interv.note}</p>}
                                                 <div className="grid grid-cols-2 gap-2 text-sm">
@@ -225,7 +231,7 @@ export default function ClienteDettaglioPage() {
                 </div>
             )}
 
-            <InterventoDialog intervento={selectedIntervento} open={dialogOpen} onOpenChange={setDialogOpen} onDelete={handleDeleteIntervento} />
+            <InterventoDialog interventoId={selectedInterventoId} open={dialogOpen} onOpenChange={setDialogOpen} onDeleted={loadData} onSaved={loadData} />
         </div>
     )
 }

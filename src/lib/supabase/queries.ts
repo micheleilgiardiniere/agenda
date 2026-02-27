@@ -158,6 +158,38 @@ export async function insertIntervento(values: { data: string; progetto_id: stri
     return interv
 }
 
+export async function getIntervento(id: string) {
+    const { data, error } = await supabase
+        .from('interventi')
+        .select('*, progetti(id, nome, tipologia, cliente_id, clienti(id, nome)), interventi_manodopera(*, dipendenti(id, nome, cognome)), interventi_materiali(*, catalogo(id, nome, unita_misura))')
+        .eq('id', id)
+        .single()
+    if (error) throw error
+    return data
+}
+
+export async function updateInterventoDettagli(id: string, values: { data: string; note: string; stato_contabile: string; manodopera: any[]; materiali: any[] }) {
+    const { error: e1 } = await supabase.from('interventi').update({ data: values.data, note: values.note, stato_contabile: values.stato_contabile }).eq('id', id)
+    if (e1) throw e1
+
+    await supabase.from('interventi_manodopera').delete().eq('intervento_id', id)
+    await supabase.from('interventi_materiali').delete().eq('intervento_id', id)
+
+    if (values.manodopera.length > 0) {
+        const { error: e2 } = await supabase.from('interventi_manodopera').insert(
+            values.manodopera.map(m => ({ intervento_id: id, dipendente_id: m.dipendente_id, ore: m.ore, costo_orario: m.costo_orario }))
+        )
+        if (e2) throw e2
+    }
+
+    if (values.materiali.length > 0) {
+        const { error: e3 } = await supabase.from('interventi_materiali').insert(
+            values.materiali.map(m => ({ intervento_id: id, catalogo_id: m.catalogo_id, quantita: m.quantita, prezzo_applicato: m.prezzo_applicato }))
+        )
+        if (e3) throw e3
+    }
+}
+
 export async function updateInterventoStato(id: string, stato: string) {
     const { error } = await supabase.from('interventi').update({ stato_contabile: stato }).eq('id', id)
     if (error) throw error
@@ -190,7 +222,7 @@ export async function updateTodo(id: string, values: Record<string, unknown>) {
 export async function getInterventiFuturo(fromDate: string, toDate: string) {
     const { data, error } = await supabase
         .from('interventi')
-        .select('data, progetti(nome, tipologia)')
+        .select('id, data, progetti(nome, tipologia, clienti(nome))')
         .gte('data', fromDate)
         .lte('data', toDate)
     if (error) throw error

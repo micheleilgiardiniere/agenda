@@ -9,6 +9,7 @@ import { Receipt, CheckCircle, Clock, FileText, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { getInterventi, updateInterventoStato } from '@/lib/supabase/queries'
+import { InterventoDialog } from '@/components/intervento-dialog'
 
 type Stato = 'da_contabilizzare' | 'conto_finito' | 'fatturato' | 'pagato'
 
@@ -22,6 +23,8 @@ const STATI: { key: Stato; label: string; short: string; color: string; Icon: Re
 export default function ContabilitaPage() {
     const [items, setItems] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
+    const [selectedInterventoId, setSelectedInterventoId] = useState<string | null>(null)
+    const [dialogOpen, setDialogOpen] = useState(false)
 
     const loadData = useCallback(async () => {
         try {
@@ -90,10 +93,10 @@ export default function ContabilitaPage() {
                             const next = nextIdx < STATI.length ? STATI[nextIdx] : null
                             return (
                                 <Card key={item.id} className="shadow-sm">
-                                    <CardContent className="p-4">
-                                        <div className="flex items-start justify-between gap-3">
+                                    <CardContent className="p-4 flex flex-col h-full">
+                                        <div className="flex items-start justify-between gap-3 cursor-pointer" onClick={() => { setSelectedInterventoId(item.id); setDialogOpen(true); }}>
                                             <div className="min-w-0 flex-1">
-                                                <p className="font-medium truncate">{item.progetto}</p>
+                                                <p className="font-medium truncate hover:text-primary transition-colors">{item.progetto}</p>
                                                 <p className="text-sm text-muted-foreground">{item.cliente} • {new Date(item.data).toLocaleDateString('it-IT')}</p>
                                             </div>
                                             <p className="text-lg font-bold tabular-nums">€{item.totale.toLocaleString()}</p>
@@ -112,6 +115,8 @@ export default function ContabilitaPage() {
                     </TabsContent>
                 ))}
             </Tabs>
+
+            <InterventoDialog interventoId={selectedInterventoId} open={dialogOpen} onOpenChange={setDialogOpen} onSaved={loadData} onDeleted={loadData} />
         </div>
     )
 }
