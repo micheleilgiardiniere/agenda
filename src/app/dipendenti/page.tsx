@@ -30,7 +30,7 @@ export default function DipendentiPage() {
     }
 
     const handleSave = async () => {
-        if (!form.nome.trim() || !form.cognome.trim()) return toast.error('Nome e cognome obbligatori')
+        if (!form.nome.trim()) return toast.error('Nome obbligatorio')
         setSaving(true)
         try {
             const payload = { nome: form.nome, cognome: form.cognome, telefono: form.telefono || null, costo_orario: parseFloat(form.costo_orario) || 0 }
@@ -54,7 +54,7 @@ export default function DipendentiPage() {
                         <div className="space-y-4 pt-2">
                             <div className="grid grid-cols-2 gap-3">
                                 <div><Label>Nome *</Label><Input value={form.nome} onChange={e => setForm(f => ({ ...f, nome: e.target.value }))} className="mt-1 touch-target" /></div>
-                                <div><Label>Cognome *</Label><Input value={form.cognome} onChange={e => setForm(f => ({ ...f, cognome: e.target.value }))} className="mt-1 touch-target" /></div>
+                                <div><Label>Cognome</Label><Input value={form.cognome} onChange={e => setForm(f => ({ ...f, cognome: e.target.value }))} className="mt-1 touch-target" /></div>
                             </div>
                             <div><Label>Telefono</Label><Input value={form.telefono} onChange={e => setForm(f => ({ ...f, telefono: e.target.value }))} type="tel" className="mt-1" /></div>
                             <div><Label>Costo Orario (€)</Label><Input value={form.costo_orario} onChange={e => setForm(f => ({ ...f, costo_orario: e.target.value }))} type="number" step="0.5" className="mt-1" /></div>
@@ -67,8 +67,8 @@ export default function DipendentiPage() {
                 {dipendenti.map(d => (
                     <Card key={d.id} className="shadow-sm">
                         <CardContent className="p-4 flex items-center gap-4">
-                            <div className="h-11 w-11 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">{d.nome[0]}{d.cognome[0]}</div>
-                            <div className="flex-1 min-w-0"><p className="font-medium">{d.nome} {d.cognome}</p><p className="text-sm text-muted-foreground">€{d.costo_orario}/h{d.telefono ? ` • ${d.telefono}` : ''}</p></div>
+                            <div className="h-11 w-11 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">{d.nome[0]}{d.cognome ? d.cognome[0] : ''}</div>
+                            <div className="flex-1 min-w-0"><p className="font-medium">{d.nome} {d.cognome || ''}</p><p className="text-sm text-muted-foreground">€{d.costo_orario}/h{d.telefono ? ` • ${d.telefono}` : ''}</p></div>
                             <button onClick={() => openEdit(d)} className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground"><Pencil className="h-4 w-4" /></button>
                         </CardContent>
                     </Card>

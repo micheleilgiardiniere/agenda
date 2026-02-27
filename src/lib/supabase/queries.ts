@@ -218,6 +218,11 @@ export async function updateTodo(id: string, values: Record<string, unknown>) {
     if (error) throw error
 }
 
+export async function deleteTodo(id: string) {
+    const { error } = await supabase.from('todo').delete().eq('id', id)
+    if (error) throw error
+}
+
 // ─── DASHBOARD HELPERS ────────────────────────────
 export async function getInterventiFuturo(fromDate: string, toDate: string) {
     const { data, error } = await supabase
