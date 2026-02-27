@@ -23,6 +23,7 @@ import {
     Package,
     BarChart3,
     ListTodo,
+    FileText,
 } from 'lucide-react'
 
 const mainNavItems = [
@@ -40,6 +41,7 @@ const menuItems = [
     { href: '/catalogo', icon: Package, label: 'Catalogo' },
     { href: '/progetti', icon: FolderKanban, label: 'Progetti' },
     { href: '/contabilita', icon: Receipt, label: 'Contabilità' },
+    { href: '/fatturazione', icon: FileText, label: 'Fatturazione' },
     { href: '/analisi', icon: BarChart3, label: 'Analisi Preventivi' },
     { href: '/todo', icon: ListTodo, label: 'Lavori Futuri' },
 ]

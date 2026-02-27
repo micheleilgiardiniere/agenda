@@ -233,3 +233,62 @@ export async function getInterventiFuturo(fromDate: string, toDate: string) {
     if (error) throw error
     return data
 }
+
+// ─── DOCUMENTI (FATTURAZIONE) ─────────────────────
+export async function getDocumenti() {
+    const { data, error } = await supabase
+        .from('documenti')
+        .select('*, clienti(id, nome), pagamenti(importo)')
+        .order('created_at', { ascending: false })
+    if (error) throw error
+    return data
+}
+
+export async function getInterventiDaFatturare(clienteId: string) {
+    const { data, error } = await supabase
+        .from('interventi')
+        .select('*, progetti!inner(cliente_id, nome), interventi_manodopera(*, dipendenti(nome, cognome)), interventi_materiali(*, catalogo(nome, unita_misura))')
+        .eq('stato_contabile', 'conto_finito')
+        .eq('progetti.cliente_id', clienteId)
+        .is('documento_id', null)
+        .order('data', { ascending: true })
+    if (error) throw error
+    return data
+}
+
+export async function insertDocumento(docData: any, righe: any[], interventiIds: string[]) {
+    // 1. Insert documento
+    const { data: doc, error: e1 } = await supabase.from('documenti').insert(docData).select().single()
+    if (e1) throw e1
+
+    // 2. Insert righe
+    if (righe.length > 0) {
+        const righeToInsert = righe.map(r => ({ ...r, documento_id: doc.id }))
+        const { error: e2 } = await supabase.from('documenti_righe').insert(righeToInsert)
+        if (e2) throw e2
+    }
+
+    // 3. Link interventi
+    if (interventiIds.length > 0) {
+        // Update interventi to link to doc and set to `fatturato` or `conto_finito` (based on doc type maybe)
+        const { error: e3 } = await supabase.from('interventi')
+            .update({ documento_id: doc.id, stato_contabile: 'fatturato' })
+            .in('id', interventiIds)
+        if (e3) throw e3
+    }
+    return doc
+}
+
+// ─── PAGAMENTI ────────────────────────────────────
+export async function getPagamenti(documento_id: string) {
+    const { data, error } = await supabase.from('pagamenti').select('*').eq('documento_id', documento_id).order('data', { ascending: false })
+    if (error) throw error
+    return data
+}
+
+export async function insertPagamento(values: any) {
+    const { error } = await supabase.from('pagamenti').insert(values)
+    if (error) throw error
+
+    // Optionally update document status if fully paid is handled by client or edge function.
+}

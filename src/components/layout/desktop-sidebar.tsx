@@ -13,6 +13,7 @@ import {
     BarChart3,
     ListTodo,
     Sprout,
+    FileText,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -24,6 +25,7 @@ const navItems = [
     { href: '/catalogo', icon: Package, label: 'Catalogo', section: 'anagrafica' },
     { href: '/progetti', icon: FolderKanban, label: 'Progetti', section: 'anagrafica' },
     { href: '/contabilita', icon: Receipt, label: 'Contabilità', section: 'contabilita' },
+    { href: '/fatturazione', icon: FileText, label: 'Fatturazione', section: 'contabilita' },
     { href: '/analisi', icon: BarChart3, label: 'Analisi Preventivi', section: 'contabilita' },
     { href: '/todo', icon: ListTodo, label: 'Lavori Futuri', section: 'main' },
 ]

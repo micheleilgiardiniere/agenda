@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { BottomNav } from "@/components/layout/bottom-nav";
-import { DesktopSidebar } from "@/components/layout/desktop-sidebar";
 import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
@@ -38,13 +36,7 @@ export default function RootLayout({
   return (
     <html lang="it">
       <body className={`${inter.variable} font-sans`}>
-        <div className="flex min-h-svh">
-          <DesktopSidebar />
-          <main className="flex-1 pb-20 md:pb-0">
-            {children}
-          </main>
-        </div>
-        <BottomNav />
+        {children}
         <Toaster position="top-center" richColors />
       </body>
     </html>
