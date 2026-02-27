@@ -173,6 +173,7 @@ export function InterventoDialog({ interventoId, open, onOpenChange, onSaved, on
     if (loading || !raw || !current) return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-md flex flex-col items-center justify-center p-12">
+                <DialogTitle className="sr-only">Caricamento in corso...</DialogTitle>
                 <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
                 <p className="text-muted-foreground">Caricamento dettagli...</p>
             </DialogContent>
