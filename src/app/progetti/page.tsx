@@ -11,9 +11,11 @@ import { Plus, Search, Pencil, FolderKanban, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { getProgetti, getClienti, insertProgetto, updateProgetto } from '@/lib/supabase/queries'
+import { useRouter } from 'next/navigation'
 import type { Cliente } from '@/types/database'
 
 export default function ProgettiPage() {
+    const router = useRouter()
     const [progetti, setProgetti] = useState<any[]>([])
     const [clienti, setClienti] = useState<Cliente[]>([])
     const [loading, setLoading] = useState(true)
@@ -74,7 +76,7 @@ export default function ProgettiPage() {
 
             <div className="space-y-2">
                 {filtered.map(p => (
-                    <Card key={p.id} onClick={() => openEdit(p)} className="shadow-sm cursor-pointer hover:shadow-md transition-all group">
+                    <Card key={p.id} onClick={() => router.push(`/clienti/${p.cliente_id}?progetto=${p.id}`)} className="shadow-sm cursor-pointer hover:shadow-md transition-all group">
                         <CardContent className="p-4 flex items-center gap-4">
                             <div className={cn('h-10 w-10 rounded-xl flex items-center justify-center shrink-0', p.tipologia === 'preventivo' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600')}>
                                 <FolderKanban className="h-5 w-5" />
@@ -87,7 +89,7 @@ export default function ProgettiPage() {
                                 <Badge variant="outline" className={cn('text-xs', p.tipologia === 'preventivo' ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-green-50 text-green-600 border-green-200')}>{p.tipologia === 'preventivo' ? '🔵 Prev.' : '🟢 Econ.'}</Badge>
                                 {p.importo_preventivo && <p className="text-sm font-bold mt-0.5">€{Number(p.importo_preventivo).toLocaleString()}</p>}
                             </div>
-                            <button className="p-2 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0"><Pencil className="h-4 w-4" /></button>
+                            <button onClick={(e) => { e.stopPropagation(); openEdit(p) }} className="p-2 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0"><Pencil className="h-4 w-4" /></button>
                         </CardContent>
                     </Card>
                 ))}
